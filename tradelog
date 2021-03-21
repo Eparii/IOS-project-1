@@ -1,0 +1,144 @@
+#!/bin/sh
+export POSIXLY_CORRECT=yes
+export LC_NUMERIC=en_US.UTF-8
+
+print_help()
+{
+  echo "\nPoužití: tradelog [-h|--help] [FILTR] [PŘÍKAZ] [LOG [LOG2 [...]]]\n"
+  echo "PŘÍKAZ může být jeden z:"
+  echo "  list-tick   - výpis seznamu vyskytujících se burzovních symbolů, tzv. \"tickerů\""
+  echo "  profit      - výpis celkového zisku z uzavřených pozic"
+  echo "  pos         - výpis hodnot aktuálně držených pozic, seřazených sestupně dle hodnoty"
+  echo "  last-price  - výpis poslední známé ceny pro každý ticker"
+  echo "  hist-ord    - výpis histogramu počtu transakcí dle tickeru\n"
+  echo "FILTR může být kombinace následujících:"
+  echo "  -a DATETIME - jsou uvažovány pouze hodnoty PO tomto datu(bez tohoto data)"
+  echo "              - DATETIME je ve formátu YYYY-MM-DD HH:MM:SS"
+  echo "  -b DATETIME - jsou uvažovány pouze záznamy PŘED tímto datem(bez tohoto data)"
+  echo "  -t TICKER   - jsou uvažovány pouze záznamy odpovídající danému tickeru."
+  echo "              - při více výskytech přepínače se bere množina všech uvedených tickerů"
+  echo "  -w WIDTH    - u výpisu grafů nastavuje jejich šířku, tedy délku nejdelšího řádku na WIDTH"
+  echo "              - WIDTH musí být kladné celé číslo. Více výskytů přepínače je chybné spuštění\n"
+}
+
+COMMAND=""
+FILTERS=""
+GZFILES=""
+OUTPUT=""
+FILES=""
+FIRST_COMMAND="TRUE"
+READ_INPUT="cat"
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    -h | --help)
+      print_help
+      exit 0
+      ;;
+    list-tick | profit | pos | last-price | hist-ord | graph-pos)
+      COMMAND="$1"
+      FIRST_COMMAND="FALSE"
+      shift
+      ;;
+    -a | -b | -t | -w)
+      FILTERS="$FILTERS $1 $2"
+      shift
+      shift
+      ;;
+    *.log.gz)
+      GZFILES="$GZFILES $1"
+      shift
+      ;;
+    *.log)
+      FILES="$FILES $1"
+      READ_INPUT="$READ_INPUT $1"
+      shift
+      ;;
+    *)
+      echo "neznámý argument \"$1\""
+      exit 1
+      ;;
+  esac
+done
+
+if [ "$GZFILES" != "" ]; then
+  for GZFILE in $GZFILES; do
+    if [ -r $GZFILE ]; then
+      gunzip $GZFILE
+      GZFILE=${GZFILE%.gz}
+      READ_INPUT="$READ_INPUT $GZFILE" 
+    else
+      echo "soubor $GZFILE nenalezen"
+      exit 1
+    fi
+  done
+fi
+
+if [ "$FILES" != "" ]; then
+  for FILE in $FILES; do
+    if [ -r $FILE ]; then
+      continue
+    else
+      echo "Soubor $FILE nenalezen"
+      exit 1
+    fi
+  done
+fi
+
+if [ "$FILES" = "" ] && [ "$GZFILES" = "" ]; then
+  READ_INPUT=""
+fi
+EDITED="$READ_INPUT"
+TICKERS=""
+I=1
+DATE_AFTER=""
+DATE_BEFORE=""
+
+for FILTER in $FILTERS; do
+I=$((I+1))
+ case $FILTER in
+  -t)
+    VALUE=$(echo $FILTERS | cut -d ' ' -f $I)
+    if [ "$TICKERS" != "" ]; then
+      TICKERS="$TICKERS|;$VALUE;"
+    else
+      TICKERS="$VALUE;"
+    fi
+    ;;
+  -a)
+    DATE_AFTER=$(echo $FILTERS | cut -d ' ' -f $I,$(($I+1)))
+    ;;
+ esac
+done
+
+if [ "$TICKERS" != "" ]; then
+  EDITED="$EDITED | awk '/^.*;$TICKERS/ { print \$0 }'"
+fi
+
+if [ "$DATE_AFTER" != "" ]; then
+DATE_AFTER=$(date --date="$DATE_AFTER" +"%s")
+
+echo $DATE_AFTER
+
+EDITED="$EDITED | awk -F\; '{ if (\$1 > DATE_AFTER) print \$00}'"        
+fi        
+
+PROFIT=0
+
+case $COMMAND in
+  list-tick)
+    if [ "$EDITED" != "" ]; then
+      EDITED="$EDITED |"
+    fi
+    EDITED="$EDITED awk -F\; '{print \$2}' | sort -u"
+    ;;
+  profit)
+    if [ "$EDITED" != "" ]; then
+      EDITED="$EDITED |"
+    fi
+    EDITED="$EDITED awk -vOFMT='%.2f' -F\; '/buy/ { print \$4*\$6 }' | awk -vOFMT='%.2f' '{ profit+=\$1 } END { print profit }'" #dodelat
+    ;;
+esac
+
+echo $EDITED
+eval $EDITED

@@ -1,0 +1,24 @@
+#!/bin/sh
+
+one="2017-03-25 05:52:09"
+two="2017-03-25 05:53:10"
+jedna=$(date --date='2012-10-10 07:20:22' +"%s")
+dva=$(date --date='2012-10-10 07:21:21' +"%s")
+echo $jedna
+echo $dva
+
+
+
+
+
+
+
+
+todate=$(date -d 2014-07-18 +%s)
+second=$(date -d 2014-07-17 +%s)
+
+if [ $todate -gt $second ];then
+echo "forst"
+else
+echo "secpmd"
+fi
