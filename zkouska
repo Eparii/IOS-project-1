@@ -1,13 +1,17 @@
 #!/bin/sh
 
-one="2017-03-25 05:52:09"
-two="2017-03-25 05:53:10"
-jedna=$(date --date='2012-10-10 07:20:22' +"%s")
+export POSIXLY_CORRECT=yes
+
+jedna=$(date --date='2021-07-29 23:00:20' +"%s")
 dva=$(date --date='2012-10-10 07:21:21' +"%s")
+tri="2021-07-29 23:00:22"
 echo $jedna
 echo $dva
 
 
+kokot="cat stock-2.log | awk -F\; -v jedna='"$tri"' '{ if (\$1 > jedna) print \$0 }'"
+echo $kokot
+eval $kokot
 
 
 

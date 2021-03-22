@@ -108,6 +108,9 @@ I=$((I+1))
   -a)
     DATE_AFTER=$(echo $FILTERS | cut -d ' ' -f $I,$(($I+1)))
     ;;
+  -b)
+    DATE_BEFORE=$(echo $FILTERS | cut -d ' ' -f $I,$(($I+1)))
+    ;;
  esac
 done
 
@@ -116,12 +119,12 @@ if [ "$TICKERS" != "" ]; then
 fi
 
 if [ "$DATE_AFTER" != "" ]; then
-DATE_AFTER=$(date --date="$DATE_AFTER" +"%s")
+  EDITED="$EDITED | awk -F\; -v DATE_AFTER='"$DATE_AFTER"' '{ if (\$1 > DATE_AFTER) print \$0}'"        
+fi
 
-echo $DATE_AFTER
-
-EDITED="$EDITED | awk -F\; '{ if (\$1 > DATE_AFTER) print \$00}'"        
-fi        
+if [ "$DATE_BEFORE" != "" ]; then
+  EDITED="$EDITED | awk -F\; -v DATE_BEFORE='"$DATE_BEFORE"' '{ if (\$1 < DATE_BEFORE) print \$0}'"
+fi
 
 PROFIT=0
 
