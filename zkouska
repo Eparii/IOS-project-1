@@ -2,27 +2,8 @@
 
 export POSIXLY_CORRECT=yes
 
-jedna=$(date --date='2021-07-29 23:00:20' +"%s")
-dva=$(date --date='2012-10-10 07:21:21' +"%s")
-tri="2021-07-29 23:00:22"
-echo $jedna
-echo $dva
+pica="cat stock-2.log | awk -vOFMT='%.2f' -F\; '{ if (\$3 == \"buy\") {profit-=\$4*\$6} else {profit+=\$4*\$6}} END {print profit}'"
 
+echo $pica
 
-kokot="cat stock-2.log | awk -F\; -v jedna='"$tri"' '{ if (\$1 > jedna) print \$0 }'"
-echo $kokot
-eval $kokot
-
-
-
-
-
-
-todate=$(date -d 2014-07-18 +%s)
-second=$(date -d 2014-07-17 +%s)
-
-if [ $todate -gt $second ];then
-echo "forst"
-else
-echo "secpmd"
-fi
+eval $pica

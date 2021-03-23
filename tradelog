@@ -139,7 +139,9 @@ case $COMMAND in
     if [ "$EDITED" != "" ]; then
       EDITED="$EDITED |"
     fi
-    EDITED="$EDITED awk -vOFMT='%.2f' -F\; '/buy/ { print \$4*\$6 }' | awk -vOFMT='%.2f' '{ profit+=\$1 } END { print profit }'" #dodelat
+    EDITED="$EDITED awk -vOFMT='%.2f' -F\; '{ if (\$3 == \"buy\") {profit-=\$4*\$6} else {profit+=\$4*\$6}} END {print profit}'"
+
+
     ;;
 esac
 
