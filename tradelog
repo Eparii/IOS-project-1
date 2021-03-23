@@ -101,7 +101,7 @@ if [ "$FILES" = "" ] && [ "$GZFILES" = "" ]; then
   READ_INPUT=""
 fi
 EDITED="$READ_INPUT"
-TICKERS=""
+TICKERS_FIND=""
 I=1
 DATE_AFTER=""
 DATE_BEFORE=""
@@ -111,10 +111,10 @@ I=$((I+1))
  case $FILTER in
   -t)
     VALUE=$(echo $FILTERS | cut -d ' ' -f $I)
-    if [ "$TICKERS" != "" ]; then
-      TICKERS="$TICKERS|;$VALUE;"
+    if [ "$TICKERS_FIND" != "" ]; then
+      TICKERS_FIND="$TICKERS_FIND || \$2 == \"$VALUE\""
     else
-      TICKERS="$VALUE;"
+      TICKERS_FIND="\$2 == \"$VALUE\""
     fi
     ;;
   -a)
@@ -126,15 +126,26 @@ I=$((I+1))
  esac
 done
 
-if [ "$TICKERS" != "" ]; then
-  EDITED="$EDITED | awk '/^.*;$TICKERS/ { print \$0 }'"
+if [ "$TICKERS_FIND" != "" ]; then
+  if [ "$EDITED" != "" ]; then
+    EDITED="$EDITED |"
+  fi
+  EDITED="$EDITED awk -F\; '$TICKERS_FIND { print \$0 }'"
 fi
 
+
 if [ "$DATE_AFTER" != "" ]; then
+  if [ "$EDITED" != "" ]; then
+    EDITED="$EDITED |"
+  fi
   EDITED="$EDITED | awk -F\; -v DATE_AFTER='"$DATE_AFTER"' '{ if (\$1 > DATE_AFTER) print \$0}'"        
 fi
 
+
 if [ "$DATE_BEFORE" != "" ]; then
+  if [ "$EDITED" != "" ]; then
+    EDITED="$EDITED |"
+  fi   
   EDITED="$EDITED | awk -F\; -v DATE_BEFORE='"$DATE_BEFORE"' '{ if (\$1 < DATE_BEFORE) print \$0}'"
 fi
 
@@ -153,6 +164,11 @@ case $COMMAND in
     fi
     EDITED="$EDITED awk -vOFMT='%.2f' -F\; '{ if (\$3 == \"buy\") { profit-=\$4*\$6 } else { profit+=\$4*\$6 }} END { print profit }'"
     ;;
+  pos)
+    if [ "$EDITED" != "" ]; then
+      EDITED="$EDITED |"
+    fi
+    EDITED="$EDITED"
 esac
 
 if [ "$EDITED" != "" ]; then
@@ -160,8 +176,6 @@ if [ "$EDITED" != "" ]; then
   eval $EDITED 
 else
  while read LINE; do
-  echo ${LINE}
+  echo $LINE
  done
 fi
-
-

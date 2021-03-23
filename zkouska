@@ -2,8 +2,7 @@
 
 export POSIXLY_CORRECT=yes
 
-pica="cat stock-2.log | awk -vOFMT='%.2f' -F\; '{ if (\$3 == \"buy\") {profit-=\$4*\$6} else {profit+=\$4*\$6}} END {print profit}'"
 
-echo $pica
 
-eval $pica
+awk -F\; '$2 == "TSLA" || $2 == "GOOGL" {print $4}' stock-2.log
+#cat stock-2.log | awk -F\; '/^.*;V/ { printf "%s %s\n", $2,$4 }' | tail -n 1
