@@ -94,6 +94,10 @@ if [ "$FILES" != "" ]; then
 fi
 
 if [ "$FILES" = "" ] && [ "$GZFILES" = "" ]; then
+  if test -t 0; then
+    echo "Nebyl zadán žádný soubor"
+    exit 1
+  fi
   READ_INPUT=""
 fi
 EDITED="$READ_INPUT"
@@ -147,11 +151,17 @@ case $COMMAND in
     if [ "$EDITED" != "" ]; then
       EDITED="$EDITED |"
     fi
-    EDITED="$EDITED awk -vOFMT='%.2f' -F\; '{ if (\$3 == \"buy\") {profit-=\$4*\$6} else {profit+=\$4*\$6}} END {print profit}'"
-
-
+    EDITED="$EDITED awk -vOFMT='%.2f' -F\; '{ if (\$3 == \"buy\") { profit-=\$4*\$6 } else { profit+=\$4*\$6 }} END { print profit }'"
     ;;
 esac
 
-echo $EDITED
-eval $EDITED
+if [ "$EDITED" != "" ]; then
+  echo $EDITED
+  eval $EDITED 
+else
+ while read LINE; do
+  echo ${LINE}
+ done
+fi
+
+
