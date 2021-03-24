@@ -31,7 +31,7 @@ GZFILES=""
 OUTPUT=""
 FILES=""
 FIRST_COMMAND="TRUE"
-READ_INPUT="cat"
+READ_INPUT=""
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -54,15 +54,28 @@ while [ "$#" -gt 0 ]; do
       shift
       ;;
     *.log.gz)
-      GZFILES="$GZFILES $1"
+      if [ "$READ_INPUT" = "" ]; then
+        READ_INPUT="gunzip -c $1"
+      else
+        READ_INPUT="$READ_INPUT | gunzip -c $1"
+      fi
+      if [ "$GZFILES" != "" ]; then
+        GZFILES="$GZILES "
+      fi
+      GZFILES="$GZFILES$1"
       shift
       ;;
     *.log)
+      if [ "$READ_INPUT" = "" ]; then
+        READ_INPUT="cat $1"
+      else
+        READ_INPUT="$READ_INPUT | cat - $1"
+      fi
       if [ "$FILES" != "" ];then
         FILES="$FILES "
       fi
-      FILES="$FILES$1"
-      READ_INPUT="$READ_INPUT $1"
+      FILES="$FILES$1" 
+      echo $READ_INPUT
       shift
       ;;
     *)
@@ -74,11 +87,7 @@ done
 
 if [ "$GZFILES" != "" ]; then
   for GZFILE in $GZFILES; do
-    if [ -r $GZFILE ]; then
-      gunzip $GZFILE
-      GZFILE=${GZFILE%.gz}
-      READ_INPUT="$READ_INPUT $GZFILE" 
-    else
+    if [ ! -r $GZFILE ]; then
       echo "soubor $GZFILE nenalezen"
       exit 1
     fi
