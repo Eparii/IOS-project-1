@@ -178,7 +178,7 @@ case $COMMAND in
       EDITED="$EDITED |"
     fi
     LONGEST_LINE=0
-    LONGEST_LINE=$(cat $FILES | sort -t\; -k2,2 -k1,1 -r | awk -F\; -v j="1" '{
+    LONGEST_LINE=$($READ_INPUT | sort -t\; -k2,2 -k1,1 -r | awk -F\; -v j="1" '{
     {ArrayTickers[NR]=$2}
     if(ArrayTickers[NR] != ArrayTickers[NR-1])
     {
@@ -242,7 +242,7 @@ case $COMMAND in
     if [ "$EDITED" != "" ]; then
       EDITED="$EDITED |"
     fi
-    LONGEST_LINE=$(cat $FILES | sort -t\; -k2,2 -k1,1 -r | sort -t\; -k2,2 -u | awk -F\; -v longest=0 '{ if(length($4)>longest) { longest=length($4)}} END {print longest} ')
+    LONGEST_LINE=$($READ_INPUT | sort -t\; -k2,2 -k1,1 -r | sort -t\; -k2,2 -u | awk -F\; -v longest=0 '{ if(length($4)>longest) { longest=length($4)}} END {print longest} ')
     EDITED="$EDITED sort -t\; -k2,2 -k1,1 -r | sort -t\; -k2,2 -u | awk -F\; -v longest="$LONGEST_LINE" '{if(length(\$4)>longest) { longest=length(\$4)} printf \"%-10s: %*s\n\",\$2,longest, \$4}'"
 esac
 
