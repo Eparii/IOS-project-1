@@ -1,9 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 
 export POSIXLY_CORRECT=yes
 
 
-LONGEST_LINE=$(cat stock-2.log | sort -t\; -s -k2,2 -k1,1 -r | sort -t\; -k2,2 -u | awk -F\; -v longest=0 '{ if(length($4)>longest) { longest=length($4)}} END {print longest} ')
-cat stock-2.log | sort -t\; -s -k2,2 -k1,1 -r | sort -t\; -k2,2 -u | awk -F\; -v longest="$LONGEST_LINE" '{if(length($4)>longest) { longest=length($4)} printf "%-10s: %*s\n",$2,longest, $4}'
-
-
+awk -F '\' '{print $0}' stock-2.log | awk -F\; '{print $2}' | awk -F\; '{print $2}'
