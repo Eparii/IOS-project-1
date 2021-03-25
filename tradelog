@@ -32,6 +32,8 @@ OUTPUT=""
 FILES=""
 FIRST_COMMAND="TRUE"
 READ_INPUT=""
+WIDTH=""
+FIRST_WIDTH="TRUE"
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -134,6 +136,13 @@ I=$((I+1))
   -b)
     DATE_BEFORE=$(echo $FILTERS | cut -d ' ' -f $I,$(($I+1)))
     ;;
+  -w)
+    if [ "$FIRST_WIDTH" = "FALSE" ]; then
+      echo "-w lze použít pouze jednou"
+      exit 1
+    fi
+    WIDTH=$(echo $FILTERS | cut -d ' ' -f $I)
+    FIRST_WIDTH="FALSE"
  esac
 done
 
@@ -170,7 +179,7 @@ case $COMMAND in
     if [ "$EDITED" != "" ]; then
       EDITED="$EDITED |"
     fi
-    EDITED="$EDITED awk -vOFMT='%.2f' -F\; -v profit=0 '{ if (\$3 == \"buy\") { profit-=\$4*\$6 } else { profit+=\$4*\$6 }} END { print profit }'"
+    EDITED="$EDITED awk -vOFMT='%.2f' -F\; -v profit=0.00 '{ if (\$3 == \"buy\") { profit-=\$4*\$6 } else { profit+=\$4*\$6 }} END { print profit }'"
     ;;
   pos)
     if [ "$EDITED" != "" ]; then
@@ -248,17 +257,27 @@ case $COMMAND in
     if [ "$EDITED" != "" ]; then
       EDITED="$EDITED |"
     fi
-    EDITED="$EDITED sort -t\; -k2,2 | awk -F \; -v SUM=1 '{
+    EDITED="$EDITED sort -t\; -k2,2 | awk -F \; -v WIDTH="$WIDTH" -v TMP=1 -v SUM=1 '{
     {TICKERS[NR]=\$2}
+    if(TICKERS[NR]==TICKERS[NR-1]) { TMP++ }
+    else if (NR==1) {}
+    else
+    { 
+      if(TMP > MAX){ {MAX=TMP} {TMP = 1}}
+      else {TMP=1}
+    }
     }
     END{
+    if (WIDTH == \"\") {WIDTH=MAX}
     for(i = 1; i <= NR+1; i++){        
       if(TICKERS[i] == TICKERS[i-1]) { SUM++ }
       else if (i==1) {continue}
       else
       {
-        {HASHTAGS=\"#\"}
-        for (j=1; j<SUM; j++)
+        {DIVIDENT=MAX/WIDTH}
+        {WRITE=int(SUM/DIVIDENT)} 
+        {HASHTAGS=\"\"}
+        for (j=0; j<WRITE; j++)
         {
           HASHTAGS=HASHTAGS \"#\"
         }
