@@ -74,8 +74,7 @@ while [ "$#" -gt 0 ]; do
       if [ "$FILES" != "" ];then
         FILES="$FILES "
       fi
-      FILES="$FILES$1" 
-      echo $READ_INPUT
+      FILES="$FILES$1"
       shift
       ;;
     *)
@@ -244,6 +243,30 @@ case $COMMAND in
     fi
     LONGEST_LINE=$($READ_INPUT | sort -t\; -k2,2 -k1,1 -r | sort -t\; -k2,2 -u | awk -F\; -v longest=0 '{ if(length($4)>longest) { longest=length($4)}} END {print longest} ')
     EDITED="$EDITED sort -t\; -k2,2 -k1,1 -r | sort -t\; -k2,2 -u | awk -F\; -v longest="$LONGEST_LINE" '{if(length(\$4)>longest) { longest=length(\$4)} printf \"%-10s: %*s\n\",\$2,longest, \$4}'"
+    ;;
+  hist-ord)
+    if [ "$EDITED" != "" ]; then
+      EDITED="$EDITED |"
+    fi
+    EDITED="$EDITED sort -t\; -k2,2 | awk -F \; -v SUM=1 '{
+    {TICKERS[NR]=\$2}
+    }
+    END{
+    for(i = 1; i <= NR+1; i++){        
+      if(TICKERS[i] == TICKERS[i-1]) { SUM++ }
+      else if (i==1) {continue}
+      else
+      {
+        {HASHTAGS=\"#\"}
+        for (j=1; j<SUM; j++)
+        {
+          HASHTAGS=HASHTAGS \"#\"
+        }
+        {printf \"%-10s: %s\n\", TICKERS[i-1], HASHTAGS}
+        {SUM=1}
+      }
+    }}'"
+    ;;
 esac
 
 if [ "$EDITED" != "" ]; then

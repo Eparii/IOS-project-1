@@ -3,4 +3,23 @@
 export POSIXLY_CORRECT=yes
 
 
-awk -F '\' '{print $0}' stock-2.log | awk -F\; '{print $2}' | awk -F\; '{print $2}'
+cat stock-2.log | sort -t\; -k2,2 | awk -F \; -v SUM=1 '{
+TICKERS[NR]=$2
+}
+END{
+for(i = 1; i <= NR+1; i++){        
+  if(TICKERS[i] == TICKERS[i-1]) { SUM++ }
+  else if (i==1) {continue}
+  else
+  {
+    HASHTAGS="#"
+    for (j=1; j<SUM; j++)
+    {
+      HASHTAGS=HASHTAGS "#"
+    }
+    printf "%-10s: %s\n", TICKERS[i-1], HASHTAGS
+    SUM=1
+   }
+}}'
+
+
