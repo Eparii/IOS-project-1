@@ -1,52 +1,5 @@
 #!/bin/sh
 
 export POSIXLY_CORRECT=yes 
-    WIDTH="100"
-    LONGEST=$(cat stock-6.log | sort -t \; -k2,2 -k1,1 -r | awk -F\; -v j=1 'function abs(x){return ((x < 0.0) ? -x : x)}{
-    {ArrayTickers[NR]=$2}
-    if(ArrayTickers[NR] != ArrayTickers[NR-1])
-    {
-      {LAST_PRICE[j]=$4}
-      {j++}
-    }
-    if($3=="sell") {ArrayHolding[NR]-=$6}
-    else {ArrayHolding[NR]+=$6}}
-    END {{j=1} for(i=1; i<=NR+1; i++){
-      if (ArrayTickers[i]== ArrayTickers[i-1]) {ArrayHolding[i]+=ArrayHolding[i-1]}
-      else if (i==1) {continue}
-      else 
-      {
-        {ACT=ArrayHolding[i-1]*LAST_PRICE[j]}
-        if ( abs(ACT) > abs(LONGEST) ) { LONGEST=ACT }
-        {j++}
-      }}
-      printf "%.2f", LONGEST}')
 
-
-    EDITED="cat stock-6.log | sort -t\; -k2,2 -k1,1 -r | awk -F\; -v j="1" -v MAX="$WIDTH" -v LONGEST="$LONGEST" 'function abs(x){return ((x < 0.0) ? -x : x)} {
-    {ArrayTickers[NR]=\$2}
-    if(ArrayTickers[NR] != ArrayTickers[NR-1])
-    {
-      {LAST_PRICE[j]=\$4}
-      {j++}
-    }
-    if(\$3 == \"sell\") {ArrayHolding[NR]-=\$6}
-    else {ArrayHolding[NR]+=\$6}
-    }
-    END {{j=1}{DIVIDENT=abs(LONGEST/MAX)} for(i=1;i<=NR+1;i++)
-    {
-      {HELLO=\"\"}
-      if(ArrayTickers[i] == ArrayTickers[i-1]){ArrayHolding[i]+=ArrayHolding[i-1]}
-      else if (i == 1) {continue}
-      else
-      {
-          {ACT=ArrayHolding[i-1]*LAST_PRICE[j]}
-          {WRITE=abs(int(ACT/DIVIDENT))}
-          {j++}
-          if(ACT < 0){for (x=0; x<WRITE; x++){HELLO=HELLO \"!\"}}
-          else{for (x=0; x<WRITE; x++){HELLO=HELLO \"#\"}} 
-          { printf \"%s %s\n\", ArrayTickers[i-1], HELLO }
-      }
-}}' | sort"
-
-eval $EDITED
+cat stock-2.log | awk -F \; -v cislo=10.00 '{cislo2=int(cislo)} END {print cislo2}'

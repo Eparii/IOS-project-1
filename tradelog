@@ -331,13 +331,14 @@ case $COMMAND in
       else
       {
           {ACT=ArrayHolding[i-1]*LAST_PRICE[j]}
-          {WRITE=abs(int(ACT/DIVIDENT))}
+          {WRITE=abs(ACT/DIVIDENT)}
+          {WRITE=int(WRITE+0.00000000001)}
           {j++}
           if(ACT < 0){for (x=0; x<WRITE; x++){PRINTING=PRINTING \"!\"}}
           else{for (x=0; x<WRITE; x++){PRINTING=PRINTING \"#\"}} 
-          { printf \"%s %s\n\", ArrayTickers[i-1], PRINTING }
+          { printf \"%-10s: %s\n\", ArrayTickers[i-1], PRINTING }
       }
-}}' | sort"
+}}'"
 esac
 
 if [ "$EDITED" != "" ]; then
