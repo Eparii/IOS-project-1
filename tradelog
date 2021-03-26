@@ -330,15 +330,17 @@ case $COMMAND in
       else if (i == 1) {continue}
       else
       {
+          {SPACE=\" \"}
           {ACT=ArrayHolding[i-1]*LAST_PRICE[j]}
           {WRITE=abs(ACT/DIVIDENT)}
-          {WRITE=int(WRITE+0.00000000001)}
+          {WRITE=int(WRITE+0.0000001)}
           {j++}
+          if(WRITE == 0){SPACE=\"\"}
           if(ACT < 0){for (x=0; x<WRITE; x++){PRINTING=PRINTING \"!\"}}
           else{for (x=0; x<WRITE; x++){PRINTING=PRINTING \"#\"}} 
-          { printf \"%-10s: %s\n\", ArrayTickers[i-1], PRINTING }
+          { printf \"%-10s:%s%s\n\", ArrayTickers[i-1], SPACE, PRINTING }
       }
-}}'"
+}}' | sort"
 esac
 
 if [ "$EDITED" != "" ]; then
