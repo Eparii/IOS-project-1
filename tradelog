@@ -275,7 +275,8 @@ case $COMMAND in
       else
       {
         {DIVIDENT=MAX/WIDTH}
-        {WRITE=int(SUM/DIVIDENT)} 
+        {WRITE=SUM/DIVIDENT}
+	{WRITE=int(WRITE+0.0000001)}
         {HASHTAGS=\"\"}
         for (j=0; j<WRITE; j++)
         {
