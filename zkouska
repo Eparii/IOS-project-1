@@ -1,5 +1,0 @@
-#!/bin/sh
-
-export POSIXLY_CORRECT=yes 
-
-cat stock-2.log | awk -F \; -v cislo=10.00 '{cislo2=int(cislo)} END {print cislo2}'
